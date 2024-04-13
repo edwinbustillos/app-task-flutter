@@ -19,11 +19,15 @@ class MyAppProvider extends StatelessWidget {
       child: Consumer<DarkModeService>(
         builder: (context, darkModeService, child) {
           return MaterialApp(
+            debugShowCheckedModeBanner: false,
             title: 'Flutter Demo',
             theme: darkModeService.isDarkMode
                 ? ThemeData.dark()
                 : ThemeData.light(),
-            home: MyHomePage(title: 'Tarefas'),
+            home: MyHomePage(
+              title: 'Tarefas',
+              key: UniqueKey(),
+            ),
           );
         },
       ),
@@ -33,29 +37,28 @@ class MyAppProvider extends StatelessWidget {
 
 class MyHomePage extends StatelessWidget {
   final String title;
-  // Remove the unused field _tarefas
-  // final _tarefas = [];
   final TextEditingController descricaoController = TextEditingController();
-  final bool apenasConcluidas = false;
 
-  //MyHomePage({super.key, required this.title});
-  MyHomePage({super.key, required this.title});
+  MyHomePage({required Key key, required this.title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     var darkModeService = Provider.of<DarkModeService>(context);
+    var tarefaRepository = Provider.of<TarefasRepository>(context);
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(title),
         actions: [
-          const Text('Dark:'),
-          Switch(
-              value: darkModeService.isDarkMode,
-              onChanged: (value) {
-                darkModeService.toggleDarkMode();
-              }),
+          IconButton(
+            icon: darkModeService.isDarkMode
+                ? const Icon(Icons.nights_stay)
+                : const Icon(Icons.wb_sunny),
+            onPressed: () {
+              darkModeService.toggleDarkMode();
+            },
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -79,7 +82,7 @@ class MyHomePage extends StatelessWidget {
                   ),
                   TextButton(
                     onPressed: () {
-                      Provider.of<TarefasRepository>(context, listen: false)
+                      tarefaRepository
                           .addTarefa(Tarefa(descricaoController.text, false));
                       Navigator.of(context).pop();
                     },
@@ -99,14 +102,25 @@ class MyHomePage extends StatelessWidget {
             child: Consumer<TarefasRepository>(
               builder: (_, tarefaRepository, Widget) {
                 return ListView.builder(
-                  itemCount: tarefaRepository.tarefas.length,
+                  itemCount: tarefaRepository.tarefas.length + 1,
                   itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return ListTile(
+                        title: const Text('Mostrar apenas tarefas concluídas'),
+                        trailing: Switch(
+                          value: tarefaRepository.apenasConcluidas,
+                          onChanged: (value) {
+                            tarefaRepository.toggleApenasConcluidas();
+                          },
+                        ),
+                      );
+                    }
+                    index -= 1;
                     var tarefa = tarefaRepository.tarefas[index];
                     return Dismissible(
                       key: Key(tarefa.id),
                       onDismissed: (direction) {
-                        Provider.of<TarefasRepository>(context, listen: false)
-                            .removeTarefa(tarefa.id);
+                        tarefaRepository.removeTarefa(tarefa.id);
                       },
                       child: ListTile(
                         title: Text(tarefa.descricao),
@@ -114,9 +128,8 @@ class MyHomePage extends StatelessWidget {
                           value: tarefa.concluida,
                           onChanged: (value) {
                             tarefa.concluida = value;
-                            Provider.of<TarefasRepository>(context,
-                                    listen: false)
-                                .toggleConcluida(tarefa.id, tarefa.concluida);
+                            tarefaRepository.toggleConcluida(
+                                tarefa.id, tarefa.concluida);
                           },
                         ),
                       ),

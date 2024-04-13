@@ -6,8 +6,6 @@ class TarefasRepository extends ChangeNotifier {
   var _apenasConcluidas = false;
   bool get apenasConcluidas => _apenasConcluidas;
 
-  //get tarefas => _tarefas;
-
   set apenasConcluidas(bool apenasConcluidas) {
     _apenasConcluidas = apenasConcluidas;
     notifyListeners();
@@ -35,6 +33,11 @@ class TarefasRepository extends ChangeNotifier {
 
   void toggleConcluida(String id, bool concluido) {
     _tarefas.where((element) => element.id == id).first.concluida = concluido;
+    notifyListeners();
+  }
+
+  void toggleApenasConcluidas() {
+    _apenasConcluidas = !_apenasConcluidas;
     notifyListeners();
   }
 }

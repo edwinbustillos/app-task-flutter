@@ -7,6 +7,7 @@ class TarefaStore = _TarefaStore with _$TarefaStore;
 
 abstract class _TarefaStore with Store {
   final String id = UniqueKey().toString();
+  _TarefaStore(this.descricao, this.concluido);
 
   @observable
   String descricao = "";
@@ -14,11 +15,14 @@ abstract class _TarefaStore with Store {
   @observable
   bool concluido = false;
 
-  _TarefaStore(this.descricao, this.concluido);
-
   @action
   alterar(String pdescricao, bool pconcluido) {
-    descricao = pdescricao;
-    concluido = pconcluido;
+    //descricao = pdescricao;
+    concluido = !pconcluido;
+  }
+
+  @action
+  void toggleConcluido() {
+    concluido = !concluido;
   }
 }

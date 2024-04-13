@@ -56,6 +56,17 @@ mixin _$TarefaStore on _TarefaStore, Store {
   }
 
   @override
+  void toggleConcluido() {
+    final _$actionInfo = _$_TarefaStoreActionController.startAction(
+        name: '_TarefaStore.toggleConcluido');
+    try {
+      return super.toggleConcluido();
+    } finally {
+      _$_TarefaStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 descricao: ${descricao},
